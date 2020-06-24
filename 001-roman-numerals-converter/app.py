@@ -1,7 +1,5 @@
 from flask import Flask, request, render_template
-import requests
 
-ip_address = requests.get('https://checkip.amazonaws.com').text.strip()
 developer_name = 'Mucahit Koca'
 
 roman_nums = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
@@ -18,10 +16,10 @@ def main_page():
 def convert():
     number = str(request.form['number'])
 
-    if number.isnumeric():
-        if int(number) > 0 and int(number) < 4000:
+    if number.isdecimal():
+        num = int(number)
+        if num > 0 and num < 4000:
             roman_list = []
-            num = int(number)
             for i in range(len(roman_nums)):
                 rom = num // roman_nums[i]
                 num = num % roman_nums[i]
@@ -33,8 +31,8 @@ def convert():
             not_valid = True
             return render_template('index.html', not_valid = not_valid, developer_name = developer_name)
     else:
-        not_vali d = True
+        not_valid = True
         return render_template('index.html', not_valid = not_valid, developer_name = developer_name)
 
 if __name__ == '__main__':
-    app.run(host:'0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=80)
