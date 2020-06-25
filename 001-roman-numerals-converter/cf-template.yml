@@ -13,11 +13,11 @@ Parameters:
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
 
   VPCId:
-    Description: VPC ID of the Lab VPC
+    Description: VPC ID
     Type: String
 
   VPCPublicSubnetId:
-    Description: Subnet ID of the public subnet within the Lab VPC
+    Description: Subnet ID of the public subnet
     Type: String
 
   KeyName:
