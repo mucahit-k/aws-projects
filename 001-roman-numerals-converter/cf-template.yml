@@ -46,7 +46,7 @@ Resources:
       ImageId: !Ref LinuxAmiId
       Tags:
         - Key: Name
-          Value: Web Server of Roman Numerals Converter
+          Value: !Sub Web Server of ${AWS::StackName} Stack
       InstanceType: !Ref EC2InstanceType
       KeyName: !Ref KeyName
       NetworkInterfaces:
