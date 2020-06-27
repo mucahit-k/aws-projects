@@ -12,14 +12,6 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
 
-  VPCId:
-    Description: VPC ID
-    Type: String
-
-  VPCPublicSubnetId:
-    Description: Subnet ID of the public subnet
-    Type: String
-
   KeyName:
     Description: Name of an existing EC2 KeyPair
     Type: AWS::EC2::KeyPair::KeyName
@@ -29,7 +21,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: SSH + HTTP
-      VpcId: !Ref VPCId
+      VpcId: vpc-0a8eb270
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
@@ -52,7 +44,7 @@ Resources:
       NetworkInterfaces:
         - DeviceIndex: 0
           AssociatePublicIpAddress: true
-          SubnetId: !Ref VPCPublicSubnetId
+          SubnetId: subnet-ccd5e2f2
           GroupSet:
             - !Ref InstanceSecurityGroup
 
