@@ -11,10 +11,18 @@ Parameters:
   LinuxAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  
+  AutoScalingMinSize:
+    Type: String
+    Description: Minimum instance number for Auto Scaling Group
+  
+  AutoScalingMaxSize:
+    Type: String
+    Description: Maximum instance number for Auto Scaling Group
 
-  KeyName:
-    Description: Name of an existing EC2 KeyPair
-    Type: AWS::EC2::KeyPair::KeyName
+  AutoScalingDesiredCapacity:
+    Type: String
+    Description: Desired instance number for Auto Scaling Group
 
 Resources:
   InstanceSecurityGroup:
@@ -41,33 +49,37 @@ Resources:
         - subnet-5032dc71
       SecurityGroups:
         - !Ref InstanceSecurityGroup
-      Listeners:
-        - LoadBalancerPort: 80
-          InstancePort: 80
-          Protocol: HTTP
-      HealthCheck:
-        Target: HTTP:80/
-        HealthyThreshold: 3
-        UnhealthyThreshold: 5
-        Interval: 30
-        Timeout: 5
+  
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref LoadBalancerTargetGroup
+      LoadBalancerArn: !Ref ElasticLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  LoadBalancerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: vpc-0a8eb270
 
   AutoScalingServerGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AvailabilityZones:
-        - us-east-1a
-        - us-east-1b
-        - us-east-1c
-        - us-east-1d
-        - us-east-1e
-        - us-east-1f 
       LaunchConfigurationName: !Ref WebServerConfig
-      DesiredCapacity: 2
-      MinSize: 1
-      MaxSize: 3
-      LoadBalancerNames:
-        - !Ref ElasticLoadBalancer
+      DesiredCapacity: !Ref AutoScalingDesiredCapacity
+      MinSize: !Ref AutoScalingMinSize
+      MaxSize: !Ref AutoScalingMaxSize
+      TargetGroupARNs: 
+        - !Ref LoadBalancerTargetGroup
       VPCZoneIdentifier:
         - subnet-b25fbfd4
         - subnet-608d3e2d
@@ -84,12 +96,8 @@ Resources:
     Properties:
       ImageId: !Ref LinuxAmiId
       InstanceType: !Ref EC2InstanceType
-      Tags:
-        - Key: Name
-          Value: !Sub Web Server of ${AWS::StackName} Stack
       SecurityGroups:
         - !Ref InstanceSecurityGroup
-      IamInstanceProfile: !Ref WebServerInstanceProfile
       UserData:
         Fn::Base64:
           !Sub |
@@ -97,10 +105,14 @@ Resources:
             yum update -y
             yum install python3 -y
             cd ~
-            wget "https://raw.githubusercontent.com/mucahit-k/aws-projects/master/001-roman-numerals-converter/app.py"
+            wget "https://raw.githubusercontent.com/mucahit-k/aws-projects/master/projects/002-milliseconds-converter/app.py"
             mkdir templates && cd templates
-            wget "https://raw.githubusercontent.com/mucahit-k/aws-projects/master/001-roman-numerals-converter/templates/index.html"
-            wget "https://raw.githubusercontent.com/mucahit-k/aws-projects/master/001-roman-numerals-converter/templates/result.html"
+            wget "https://raw.githubusercontent.com/mucahit-k/aws-projects/master/projects/002-milliseconds-converter/templates/index.html"
+            wget "https://raw.githubusercontent.com/mucahit-k/aws-projects/master/projects/002-milliseconds-converter/templates/result.html"
             pip3 install flask
             python3 ~/app.py
       
+Outputs:
+  WebsiteURL:
+    Value: !Sub http://${ElasticLoadBalancer.DNSName}
+    Description: Application URL
