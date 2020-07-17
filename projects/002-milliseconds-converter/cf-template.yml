@@ -25,7 +25,7 @@ Parameters:
     Description: Desired instance number for Auto Scaling Group
 
 Resources:
-  InstanceSecurityGroup:
+  LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: HTTP
@@ -35,6 +35,17 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: HTTP
+      VpcId: vpc-0a8eb270
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
 
   ElasticLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -48,7 +59,7 @@ Resources:
         - subnet-83ad088d
         - subnet-5032dc71
       SecurityGroups:
-        - !Ref InstanceSecurityGroup
+        - !Ref LoadBalancerSecurityGroup
   
   LoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
