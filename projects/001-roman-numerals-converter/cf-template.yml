@@ -67,5 +67,5 @@ Outputs:
     Value: 
       Fn::GetAtt:
         - EC2Instance
-        - PublicIp
+        - PublicDnsName
     Description: Application URL
