@@ -22,26 +22,6 @@ connection = mysql.connect()
 connection.autocommit(True)
 cursor = connection.cursor()
 
-def init_phonebook_db():
-    drop_table = 'DROP TABLE IF EXISTS phonebook.phonebook;'
-    phonebook_table = """
-    CREATE TABLE phonebook(
-    id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    number VARCHAR(100) NOT NULL,
-    PRIMARY KEY (id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    """
-    data = """
-    INSERT INTO phonebook.phonebook (name, number)
-    VALUES
-        ("Callahan", "1234567890"),
-        ("Sergio Taco", "67854"),
-        ("Vincenzo Altobelli", "876543554");
-    """
-    cursor.execute(drop_table)
-    cursor.execute(phonebook_table)
-    cursor.execute(data)
 
 def find_persons(keyword):
     query=f"""
@@ -126,7 +106,7 @@ def add_record():
         result = insert_person(name, number)
         return render_template('add-update.html', show_result = True, result = result, not_valid = False, action_name = 'save', developer_name = developer_name)
     else:
-        return render_template('add-update.html', action_name = 'save', show-result = False, not_valid = False)
+        return render_template('add-update.html', action_name = 'save', show_result = False, not_valid = False)
 
 @app.route('/update', methods=['POST', 'GET'])
 def update_record():
@@ -164,5 +144,4 @@ def delete_record():
 
 
 if __name__ == '__main__':
-    init_phonebook_db()
     app.run(host='0.0.0.0', port=80)
